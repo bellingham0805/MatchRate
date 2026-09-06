@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080b10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>MatchRate</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080b10;color:#f5f7fa;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+.app{max-width:760px;margin:auto;min-height:100vh;padding-bottom:88px}
+header{padding:25px 18px 14px;position:sticky;top:0;background:rgba(8,11,16,.94);backdrop-filter:blur(16px);z-index:20;border-bottom:1px solid rgba(255,255,255,.04)}
+.brand{font-size:28px;font-weight:850;letter-spacing:-.5px}.muted,.small{color:#8d96a3}.sub{font-size:13px;margin-top:4px}
+main{padding:12px 15px}
+.card{background:#11161e;border:1px solid #202733;border-radius:19px;padding:16px;margin:12px 0}
+.hero{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.big{font-size:40px;font-weight:850;letter-spacing:-1px}.label{font-size:11px;color:#8d96a3;text-transform:uppercase;letter-spacing:.1em}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#0d1219;border-radius:15px;padding:14px}
+.stat b{font-size:23px}
+button{border:0;border-radius:13px;padding:12px 15px;background:#e9eef5;color:#080b10;font-weight:750;font-size:15px;cursor:pointer}
+button.secondary{background:#202733;color:#f5f7fa}button.danger{background:#391c22;color:#ffb8c0}
+button.ghost{background:transparent;color:#aeb6c2;padding:8px}
+.row{display:flex;gap:9px;align-items:center}.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+input,select,textarea{width:100%;background:#0b1017;color:#fff;border:1px solid #2a3340;border-radius:12px;padding:12px;font-size:16px;margin-top:6px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#687587}textarea{min-height:80px}.field{margin:11px 0}.field label{font-size:13px;color:#aeb6c2}
+.rating{font-size:28px;font-weight:850}.rating.good{color:#c9f7d2}
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(9,12,17,.97);border-top:1px solid #222a35;display:flex;justify-content:center;z-index:30}
+.nav-inner{width:min(760px,100%);display:grid;grid-template-columns:repeat(4,1fr)}
+.nav button{background:none;color:#8f99a7;border-radius:0;padding:10px 4px;font-size:12px}.nav button.active{color:#fff}
+.list{display:flex;flex-direction:column;gap:8px}.item{background:#0d1219;border-radius:14px;padding:13px}
+.pill{display:inline-block;background:#202733;border-radius:999px;padding:5px 9px;font-size:11px;color:#cbd3dd}
+.empty{text-align:center;padding:45px 15px;color:#8d96a3}
+.search{margin:10px 0}.search input{margin:0}
+.segment{display:flex;background:#0d1219;border-radius:13px;padding:4px;margin:12px 0}
+.segment button{flex:1;background:transparent;color:#8d96a3;padding:9px;font-size:13px}
+.segment button.active{background:#202733;color:#fff}
+.match-card{cursor:pointer;transition:.15s}.match-card:active{transform:scale(.99)}
+.score{font-size:24px;font-weight:850;letter-spacing:.5px}.teams{font-weight:750}
+.player-line{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.badge{font-size:10px;padding:4px 7px;border-radius:7px;background:#202733;color:#aeb6c2}
+.divider{height:1px;background:#202733;margin:14px 0}
+.back{margin-bottom:5px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+.sheet{width:min(760px,100%);max-height:88vh;overflow:auto;background:#11161e;border:1px solid #28313d;border-radius:24px 24px 0 0;padding:18px}
+.close{float:right;border-radius:50%;width:38px;height:38px;padding:0;background:#202733;color:#fff}
+.hidden{display:none}
+@media(max-width:480px){.grid{grid-template-columns:1fr 1fr}.big{font-size:35px}}
+
+.club-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.club-choice{display:flex;align-items:center;gap:10px;text-align:left;background:#0d1219;color:#fff;border:1px solid #252e3a}
+.club-logo{width:42px;height:42px;border-radius:12px;background:#202733;display:grid;place-items:center;font-weight:850;font-size:12px;flex:none}
+.club-choice.selected{border-color:#fff}
+.filter-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.photo{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#202733;display:grid;place-items:center;font-weight:850}.fav-profile-head{display:flex;align-items:center;gap:14px}.profile-photo{width:72px;height:72px;border-radius:50%;background:#202733;display:grid;place-items:center;font-size:22px;font-weight:850}
+.fav-card{display:flex;align-items:center;gap:12px}
+.rank{width:30px;font-weight:850;color:#8d96a3}
+.club-logo,.score-logo{position:relative;overflow:hidden}.club-logo{width:42px;height:42px;border-radius:12px;background:#202733;display:grid;place-items:center;font-weight:850;font-size:12px;flex:none;object-fit:contain}.score-logo{width:38px;height:38px;border-radius:50%;background:#202733;display:grid;place-items:center;font-size:10px;font-weight:900;margin:auto auto 5px;object-fit:contain}.logo-fallback{display:none!important;place-items:center}
+
+@media(max-width:480px){.filter-grid{grid-template-columns:1fr 1fr}.club-grid{grid-template-columns:1fr}}
+
+/* Visual lineup / match UI */
+.pitch-wrap{background:#15191e;border-radius:18px;overflow:hidden;border:1px solid #262d35;margin-top:12px}
+.pitch-head{padding:12px 14px;background:#25292d;display:flex;justify-content:space-between;align-items:center}
+.team-title{display:flex;align-items:center;gap:9px;font-weight:800}.team-rating{background:#20c979;color:#06140d;border-radius:999px;padding:5px 11px;font-weight:850}
+.pitch{position:relative;min-height:560px;padding:28px 18px;background:linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),#15191e;background-size:50% 100%,100% 25%,100% 100%;}
+.pitch:before{content:"";position:absolute;inset:0;border:2px solid rgba(255,255,255,.08);pointer-events:none}.pitch-line{display:flex;justify-content:space-around;align-items:center;gap:8px;margin:16px 0;position:relative;z-index:1}.pitch-player{width:88px;text-align:center;cursor:pointer}.avatar{width:58px;height:58px;margin:auto;border-radius:50%;display:grid;place-items:center;background:#3a3f44;border:4px solid #4b5055;font-size:15px;font-weight:850}.p-rating{display:inline-block;margin-top:-7px;position:relative;background:#24cf7b;color:#06140d;border-radius:9px;padding:3px 7px;font-size:16px;font-weight:900;min-width:42px}.p-rating.mid{background:#ff9b42}.p-name{font-size:13px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p-num{font-size:11px;color:#9ba3ad}.sub-list{padding:12px;background:#101419}.sub-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #252b32}.sub-row:last-child{border-bottom:0}.sub-avatar{width:38px;height:38px;border-radius:50%;background:#34393e;display:grid;place-items:center;font-size:11px;font-weight:800}.delete-mini{padding:8px 10px;font-size:12px;background:#391c22;color:#ffb8c0}.match-actions{display:flex;gap:8px;margin-top:12px}.score-head{display:flex;justify-content:center;align-items:center;gap:18px;padding:8px 0 14px}.score-head .score{font-size:32px}.score-team{text-align:center;font-weight:800}.score-logo{width:38px;height:38px;border-radius:50%;background:#202733;display:grid;place-items:center;font-size:10px;font-weight:900;margin:auto auto 5px}.detail-tabs{display:flex;gap:4px;overflow:auto;border-bottom:1px solid #252b32;margin:0 -18px;padding:0 18px}.detail-tabs span{padding:11px 12px;color:#858e99;font-weight:700}.detail-tabs .active{color:#fff;border-bottom:2px solid #fff}
+@media(max-width:480px){.pitch{min-height:520px;padding-left:8px;padding-right:8px}.pitch-player{width:76px}.avatar{width:52px;height:52px}.p-name{font-size:12px}}
+.local-club-logo{background:transparent!important;display:grid!important;place-items:center!important;overflow:visible!important}.crest-shield{width:30px;height:34px;border-radius:8px 8px 12px 12px;position:relative;display:grid;place-items:center;background:linear-gradient(90deg,var(--ca) 0 48%,var(--cb) 48% 52%,var(--ca) 52%);border:2px solid var(--cb);box-shadow:0 1px 5px rgba(0,0,0,.35);clip-path:polygon(8% 0,92% 0,100% 72%,50% 100%,0 72%)}.crest-shield:before{content:"";position:absolute;inset:4px;border:1px solid rgba(255,255,255,.6);clip-path:inherit}.crest-shield b{position:relative;z-index:2;font-size:9px;line-height:1;color:var(--cb);text-shadow:0 1px 1px rgba(0,0,0,.2)}.crest-stripe{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 7px,rgba(255,255,255,.18) 7px 10px);opacity:.7}.score-logo .crest-shield{width:34px;height:38px}.club-logo .crest-shield{width:34px;height:38px}.team-title .score-logo{margin:0}.score-team .score-logo{margin:auto auto 5px}</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">MatchRate ⚽</div>
+  <div class="sub muted">Your personal football rating database</div>
+</header>
+<main id="main"></main>
+<nav class="nav"><div class="nav-inner">
+ <button onclick="go('home')" id="n-home">⌂<br>Home</button>
+ <button onclick="go('matches')" id="n-matches">▤<br>Matches</button>
+ <button onclick="go('players')" id="n-players">★<br>Players</button>
+ <button onclick="go('favorites')" id="n-favorites">♡<br>Favorites</button>
+</div></nav>
+</div>
+
+<div id="modal" class="modal hidden" onclick="if(event.target.id==='modal')closeModal()">
+ <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+const KEY="matchrate_v3";
+let data=JSON.parse(localStorage.getItem(KEY)||"null")||{matches:[],favorites:{players:[],clubs:[]}};
+data.matches=(data.matches||[]).map(x=>({...x,players:(x.players||[]).map(p=>({...p,starter:p.starter!==false,position:p.position||""}))}));
+data.favorites=data.favorites||{players:[],clubs:[]};
+data.favoriteProfiles=data.favoriteProfiles||{};
+let page="home", pc=0, playerSearch="", posFilter="all", clubFilter="all", compFilter="all";
+let builder={home:"",away:"",date:new Date().toISOString().slice(0,10),time:"19:00",comp:"Premier League"};
+const clubs=[
+ ["AFC Bournemouth","BOU",8678],
+ ["Arsenal","ARS",9825],
+ ["Aston Villa","AVL",10252],
+ ["Brentford","BRE",3372],
+ ["Brighton & Hove Albion","BHA",10204],
+ ["Chelsea","CHE",8455],
+ ["Coventry City","COV",null],
+ ["Crystal Palace","CRY",9826],
+ ["Everton","EVE",8668],
+ ["Fulham","FUL",null],
+ ["Hull City","HUL",null],
+ ["Ipswich Town","IPS",null],
+ ["Leeds United","LEE",null],
+ ["Liverpool","LIV",8650],
+ ["Manchester City","MCI",8456],
+ ["Manchester United","MUN",10260],
+ ["Newcastle United","NEW",10261],
+ ["Nottingham Forest","NFO",10203],
+ ["Sunderland","SUN",null],
+ ["Tottenham","TOT",8586],
+ ["Athletic Club","ATH",8601],
+ ["Atletico Madrid","ATM",9906],
+ ["CA Osasuna","OSA",null],
+ ["Celta","CEL",null],
+ ["Deportivo Alavés","ALA",null],
+ ["Elche CF","ELC",null],
+ ["Barcelona","BAR",8634],
+ ["Getafe CF","GET",null],
+ ["Levante UD","LEV",null],
+ ["Málaga CF","MAL",null],
+ ["Racing Santander","RAC",null],
+ ["Rayo Vallecano","RAY",null],
+ ["Deportivo La Coruña","DEP",null],
+ ["Espanyol","ESP",null],
+ ["Real Betis","BET",8603],
+ ["Real Madrid","RMA",8633],
+ ["Real Sociedad","RSO",null],
+ ["Sevilla","SEV",3602],
+ ["Valencia","VAL",10267],
+ ["Villarreal","VIL",10205],
+ ["AC Milan","MIL",8564],
+ ["Atalanta","ATA",8688],
+ ["Bologna","BOL",null],
+ ["Cagliari","CAG",null],
+ ["Como","COM",null],
+ ["Fiorentina","FIO",8535],
+ ["Frosinone","FRO",null],
+ ["Genoa","GEN",null],
+ ["Inter Milan","INT",8636],
+ ["Juventus","JUV",9885],
+ ["Lazio","LAZ",8543],
+ ["Lecce","LEC",null],
+ ["Monza","MON",null],
+ ["Napoli","NAP",9875],
+ ["Parma","PAR",null],
+ ["AS Roma","ROM",8686],
+ ["Sassuolo","SAS",null],
+ ["Torino","TOR",null],
+ ["Udinese","UDI",null],
+ ["Venezia","VEN",null],
+ ["FC Augsburg","AUG",null],
+ ["Union Berlin","FCU",null],
+ ["Werder Bremen","SVW",null],
+ ["Borussia Dortmund","BVB",9789],
+ ["Elversberg","ELV",null],
+ ["Eintracht Frankfurt","SGE",9810],
+ ["Freiburg","SCF",null],
+ ["Hamburger SV","HSV",null],
+ ["Hoffenheim","TSG",null],
+ ["1. FC Köln","KOE",null],
+ ["RB Leipzig","RBL",10029],
+ ["Bayer Leverkusen","B04",9878],
+ ["Mainz 05","M05",null],
+ ["Borussia Mönchengladbach","BMG",null],
+ ["Bayern Munich","BAY",9823],
+ ["Paderborn","SCP",null],
+ ["Schalke 04","S04",null],
+ ["VfB Stuttgart","VFB",null],
+ ["Angers SCO","ANG",null],
+ ["AJ Auxerre","AUX",null],
+ ["Stade Brestois 29","BRE",null],
+ ["Le Havre AC","HAC",null],
+ ["RC Lens","LEN",null],
+ ["Lille","LIL",1082],
+ ["FC Lorient","LOR",null],
+ ["Lyon","OL",9746],
+ ["Le Mans FC","LMF",null],
+ ["Marseille","OM",8591],
+ ["Monaco","ASM",9829],
+ ["OGC Nice","NIC",null],
+ ["Paris FC","PFC",null],
+ ["Paris Saint-Germain","PSG",9847],
+ ["Stade Rennais FC","REN",null],
+ ["RC Strasbourg Alsace","STR",null],
+ ["Toulouse FC","TFC",null],
+ ["ESTAC Troyes","TRO",null],
+ ["Ajax","AJX",8590],
+ ["PSV Eindhoven","PSV",8650],
+ ["Feyenoord","FEY",10235],
+ ["Benfica","BEN",9768],
+ ["Porto","POR",9772],
+ ["Sporting CP","SCP",9764],
+ ["Celtic","CEL",9927],
+ ["Rangers","RAN",5011],
+ ["Galatasaray","GAL",10237],
+ ["Fenerbahce","FEN",10228],
+ ["River Plate","RIV",10228],
+ ["Boca Juniors","BOC",10034],
+ ["Flamengo","FLA",10236],
+ ["Palmeiras","PAL",10219],
+ ["Inter Miami","MIA",10205],
+ ["LAFC","LAFC",10205],
+ ["New York City FC","NYC",10205],
+ ["Arsenal Women","ARW",9825]
+];
+function clubInfo(name){return clubs.find(c=>c[0]===name)||[name,String(name||"").slice(0,3).toUpperCase(),null]}
+const logoIds={"Arsenal":"359","Chelsea":"363","Liverpool":"364","Manchester City":"382","Manchester United":"360","Tottenham":"367","Real Madrid":"86","Barcelona":"83","Bayern Munich":"132","Paris Saint-Germain":"160","Inter Milan":"110","AC Milan":"103","Juventus":"111","Borussia Dortmund":"124","Atletico Madrid":"1068","Ajax":"139","Benfica":"2345","Porto":"437"};
+const clubColors={
+ Arsenal:["#db0007","#ffffff"],Chelsea:["#034694","#ffffff"],Liverpool:["#c8102e","#f6eb61"],"Manchester City":["#6cabdd","#ffffff"],"Manchester United":["#da291c","#fbe122"],Tottenham:["#132257","#ffffff"],
+ "Newcastle United":["#241f20","#ffffff"],"Aston Villa":["#670e36","#95bfe5"],"West Ham United":["#7a263a","#1bb1e7"],Everton:["#003399","#ffffff"],"Nottingham Forest":["#e53233","#ffffff"],"Crystal Palace":["#1b458f","#c4122e"],"Brighton & Hove Albion":["#0057b8","#ffffff"],"Wolverhampton Wanderers":["#fdb913","#231f20"],"AFC Bournemouth":["#da291c","#000000"],Brentford:["#e30613","#ffffff"],
+ "Real Madrid":["#ffffff","#00529f"],Barcelona:["#a50044","#004d98"],"Atletico Madrid":["#c8102e","#ffffff"],Sevilla:["#d71920","#ffffff"],Valencia:["#ff8c00","#000000"],Villarreal:["#fff200","#0057b8"],"Athletic Club":["#ee2523","#ffffff"],"Real Betis":["#00954c","#ffffff"],
+ "Bayern Munich":["#dc052d","#0066b2"],"Bayer Leverkusen":["#e32221","#000000"],"Borussia Dortmund":["#fdeb00","#000000"],"RB Leipzig":["#dd0741","#ffffff"],"Eintracht Frankfurt":["#e1000f","#ffffff"],Wolfsburg:["#65b32e","#ffffff"],
+ "Paris Saint-Germain":["#004170","#ed1c24"],Marseille:["#2faee0","#ffffff"],Lyon:["#1d428a","#e30613"],Monaco:["#ce1126","#ffffff"],Lille:["#e31b23","#003b7a"],
+ "Inter Milan":["#0068a8","#000000"],"AC Milan":["#fb090b","#000000"],Juventus:["#ffffff","#000000"],Napoli:["#12a0d7","#ffffff"],"AS Roma":["#8e1f2f","#f6a800"],Lazio:["#87ceeb","#ffffff"],Atalanta:["#1e71b8","#000000"],Fiorentina:["#482e92","#ffffff"],
+ Ajax:["#d2122e","#ffffff"],"PSV Eindhoven":["#ed1c24","#ffffff"],Feyenoord:["#e30613","#000000"],Benfica:["#e30613","#ffffff"],Porto:["#00428c","#ffffff"],"Sporting CP":["#008e3a","#ffffff"],Celtic:["#00843d","#ffffff"],Rangers:["#0065a8","#ffffff"],Galatasaray:["#a90432","#fdbb30"],Fenerbahce:["#ffed00","#002d72"],
+ "River Plate":["#ffffff","#d71920"],"Boca Juniors":["#003b7a","#f5c400"],Flamengo:["#000000","#e31b23"],Palmeiras:["#006437","#ffffff"],"Inter Miami":["#f7b5cd","#000000"],LAFC:["#000000","#c9a227"],"New York City FC":["#6cace4","#ffffff"],"Arsenal Women":["#db0007","#ffffff"]
+};
+function clubLogo(name,cls="score-logo"){
+ const c=clubInfo(name), colors=clubColors[name]||["#202733","#ffffff"], a=colors[0], b=colors[1], initials=c[1];
+ return `<span class="${cls} local-club-logo" role="img" aria-label="${esc(name)} logo" style="--ca:${a};--cb:${b}"><span class="crest-shield"><span class="crest-stripe"></span><b>${esc(initials)}</b></span></span>`;
+}
+const competitions=["Premier League","Champions League","La Liga","Serie A","Bundesliga","Ligue 1","FA Cup","Europa League"];
+
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function avg(a){return a.length?(a.reduce((x,y)=>x+y,0)/a.length).toFixed(1):"—"}
+function go(p){page=p;render()}
+function allPlayers(){
+ let a=[];data.matches.forEach(x=>x.players.forEach(p=>a.push({...p,team:p.team||"—",match:x.home+" vs "+x.away,date:x.date,matchId:x.id})));
+ return a;
+}
+function playerMap(){
+ let map={}; allPlayers().forEach(p=>{
+  let k=p.name.toLowerCase();
+  if(!map[k])map[k]={name:p.name,ratings:[],goals:0,assists:0,team:p.team,position:p.position||""};
+  map[k].ratings.push(+p.rating||0);map[k].goals+=+p.goals||0;map[k].assists+=+p.assists||0;
+ });
+ return map;
+}
+function render(){
+ document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));
+ let n=document.getElementById("n-"+page);if(n)n.classList.add("active");
+ const m=document.getElementById("main");
+ if(page==="home")home(m);
+ if(page==="matches")matches(m);
+ if(page==="players")players(m);
+ if(page==="favorites")favorites(m);
+}
+function home(m){
+ let ps=allPlayers(), best=ps.length?[...ps].sort((a,b)=>b.rating-a.rating)[0]:null;
+ let rated=data.matches.filter(x=>+x.mr>0).sort((a,b)=>(+b.mr)-(+a.mr));
+ let topMatch=rated[0], watched=data.matches.filter(x=>x.watched===true || +x.mr>0).sort((a,b)=>(+b.mr)-(+a.mr));
+ m.innerHTML=`
+ <div class="card"><div class="hero">
+  <div><div class="label">Matches rated</div><div class="big">${data.matches.length}</div></div>
+  <div style="text-align:right"><div class="label">Player ratings</div><div class="big">${ps.length}</div></div>
+ </div></div>
+ ${topMatch?`<div class="card match-card" onclick="openMatch(${topMatch.id})"><div class="between"><h3 style="margin:0">Your Top Rated Match</h3><span class="rating">${(+topMatch.mr).toFixed(1)}</span></div><p class="teams">${esc(topMatch.home)} ${topMatch.hs}–${topMatch.as} ${esc(topMatch.away)}</p><div class="small">${esc(topMatch.comp||"Football")} · ${esc(topMatch.date)}</div></div>`:""}
+ <div class="card"><div class="between"><h3 style="margin:0">Watch List</h3><button class="ghost" onclick="go('watchlist')">See all</button></div>
+ ${watched.length?watched.slice(0,5).map((x,i)=>`<div class="item match-card" onclick="openMatch(${x.id})" style="margin-top:8px"><div class="between"><div><span class="rank">#${i+1}</span> <b>${esc(x.home)} vs ${esc(x.away)}</b></div><span class="rating">${(+x.mr).toFixed(1)}</span></div></div>`).join(""):`<div class="empty" style="padding:25px">Rate a match and it will appear here.</div>`}
+ </div>
+ ${best?`<div class="card"><div class="between"><h3 style="margin:0">Your Top Player</h3><span class="pill">${esc(best.name)}</span></div><p class="muted">${esc(best.team)} · ${(+best.rating).toFixed(1)}</p><button class="secondary" onclick="openPlayer('${esc(best.name).replace(/'/g,"&#39;")}')">View profile</button></div>`:""}
+ <div class="card"><h3 style="margin-top:0">Quick Start</h3><p class="muted">Create a match, choose both clubs, add lineups, and rate every player.</p><button onclick="openBuilder(true)">＋ Add Match</button></div>`;
+}
+function matches(m){
+ m.innerHTML=`<div class="between"><div><h2 style="margin:0">Matches</h2><div class="small">${data.matches.length} saved</div></div><button onclick="openBuilder(true)">＋ Add Match</button></div>
+ <div class="list" style="margin-top:12px">${data.matches.length?data.matches.map(x=>`<div class="card match-card"><div onclick="openMatch(${x.id})"><div class="between"><div><div class="teams">${esc(x.home)} ${x.hs??0}–${x.as??0} ${esc(x.away)}</div><div class="small" style="margin-top:5px">${esc(x.comp||"Football")} · ${esc(x.date||"")} ${esc(x.time||"")}</div></div><span class="rating">${(+x.mr||0).toFixed(1)}</span></div><div class="small" style="margin-top:10px">${x.players.length} players · Tap for lineup</div></div><div class="match-actions"><button class="secondary" style="flex:1" onclick="openMatch(${x.id})">View lineup</button><button class="delete-mini" onclick="event.stopPropagation();delMatch(${x.id})">Delete</button></div></div>`).join(""):`<div class="empty">No matches yet. Add your first match.</div>`}</div>`;
+}
+function openBuilder(reset=false){
+ if(reset || !builder.date){
+  builder={home:"",away:"",date:new Date().toISOString().slice(0,10),time:"19:00",comp:"Premier League"};
+ }
+ showModal();
+ document.getElementById("sheet").innerHTML=`<button class="close" onclick="closeModal()">×</button>
+ <h2 style="margin:3px 48px 12px 0">Add Match</h2>
+ <div class="field"><label>Home club</label><button class="secondary" style="width:100%;text-align:left" onclick="clubPicker('home')">${builder.home||"Choose club"}</button></div>
+ <div class="field"><label>Away club</label><button class="secondary" style="width:100%;text-align:left" onclick="clubPicker('away')">${builder.away||"Choose club"}</button></div>
+ <div class="grid"><div class="field"><label>Date</label><input id="bdate" type="date" value="${builder.date}"></div><div class="field"><label>Time</label><input id="btime" type="time" value="${builder.time}"></div></div>
+ <div class="field"><label>Competition</label><select id="bcomp">${competitions.map(c=>`<option ${c===builder.comp?"selected":""}>${c}</option>`).join("")}</select></div>
+ <button onclick="createMatch()">Create match</button>
+ <div id="builderError" class="small" style="margin-top:10px;color:#ffb8c0"></div>`;
+}
+function clubPicker(which){
+ builder.date=document.getElementById("bdate")?.value||builder.date;builder.time=document.getElementById("btime")?.value||builder.time;builder.comp=document.getElementById("bcomp")?.value||builder.comp;
+ showModal();
+ document.getElementById("sheet").innerHTML=`<button class="close" onclick="openBuilder(false)">×</button><h2>Choose ${which==="home"?"home":"away"} club</h2>
+ <input id="clubSearch" placeholder="Search clubs..." oninput="filterClubs('${which}',this.value)">
+ <div id="clubGrid" class="club-grid">${clubButtons(which,"")}</div>`;
+}
+function clubButtons(which,q){
+ q=(q||"").toLowerCase();
+ return clubs.filter(c=>c[0].toLowerCase().includes(q)).map(c=>`<button class="club-choice ${builder[which]===c[0]?"selected":""}" onclick="chooseClub('${which}','${esc(c[0]).replace(/'/g,"&#39;")}')">${clubLogo(c[0],"club-logo")}<span>${esc(c[0])}</span></button>`).join("")||`<div class="empty">No clubs found.</div>`;
+}
+function filterClubs(which,q){document.getElementById("clubGrid").innerHTML=clubButtons(which,q)}
+function chooseClub(which,name){builder[which]=name;openBuilder(false)}
+function createMatch(){
+ builder.date=document.getElementById("bdate").value;builder.time=document.getElementById("btime").value;builder.comp=document.getElementById("bcomp").value;
+ if(!builder.home||!builder.away||builder.home===builder.away){
+  let e=document.getElementById("builderError"); if(e)e.textContent="Choose two different clubs before creating the match.";
+  return;
+ }
+  const positions=["GK","LB","CB","CB","RB","DM","CM","AM","LW","RW","ST"];
+  let players=[];
+  [builder.home,builder.away].forEach(team=>positions.forEach((position,i)=>players.push({name:`Player ${i+1}`,team,position,starter:true,rating:7,goals:0,assists:0})));
+  let x={id:Date.now(),home:builder.home,away:builder.away,hs:0,as:0,date:builder.date,time:builder.time,comp:builder.comp,mr:0,watched:false,notes:"",players};
+  data.matches.unshift(x);save();closeModal();openMatch(x.id);
+}
+function openLineupEditor(id){
+ let x=data.matches.find(z=>z.id===id); if(!x)return;
+ let rows=(x.players.length?x.players:[{name:"",team:x.home,position:"",starter:true,rating:7,goals:0,assists:0},{name:"",team:x.away,position:"",starter:true,rating:7,goals:0,assists:0}]);
+ showModal();
+ document.getElementById("sheet").innerHTML=`<button class="close" onclick="closeModal()">×</button><h2>Edit Full Lineups</h2><div class="small">${esc(x.home)} vs ${esc(x.away)}</div><div id="lineupRows">${rows.map((p,i)=>lineupRow(p,i,x)).join("")}</div><button class="secondary" onclick="addLineupRow(${x.id})">＋ Add player</button><div style="margin-top:16px"><button onclick="saveLineupEditor(${x.id})">Save lineups</button></div>`;
+}
+function lineupRow(p,i,x){
+ return `<div class="item" style="margin:9px 0"><div class="grid"><input class="ln" data-i="${i}" value="${esc(p.name)}" placeholder="Player name"><select class="lt" data-i="${i}"><option>${esc(p.team||x.home)}</option><option>${esc(x.home)}</option><option>${esc(x.away)}</option></select></div><div class="grid"><select class="lp" data-i="${i}"><option value="">Position</option>${["GK","CB","LB","RB","CM","DM","AM","LW","RW","ST"].map(v=>`<option ${p.position===v?"selected":""}>${v}</option>`).join("")}</select><select class="ls" data-i="${i}"><option value="1" ${p.starter!==false?"selected":""}>Starting XI</option><option value="0" ${p.starter===false?"selected":""}>Substitute</option></select></div></div>`;
+}
+function addLineupRow(id){let x=data.matches.find(z=>z.id===id);x.players.push({name:"",team:x.home,position:"",starter:true,rating:7,goals:0,assists:0});openLineupEditor(id)}
+function saveLineupEditor(id){
+ let x=data.matches.find(z=>z.id===id),old=x.players;let out=[];
+ document.querySelectorAll(".ln").forEach((e,i)=>{let name=e.value.trim();if(!name)return;let oldp=old[i]||{};out.push({name,team:document.querySelector(`.lt[data-i="${i}"]`).value,position:document.querySelector(`.lp[data-i="${i}"]`).value,starter:document.querySelector(`.ls[data-i="${i}"]`).value==="1",rating:oldp.rating||7,goals:oldp.goals||0,assists:oldp.assists||0})});
+ x.players=out;save();openMatch(id);
+}
+function initials(name){return String(name||"?").split(/\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}
+function ratingClass(r){return (+r||0)<7?"mid":""}
+function pitchTeam(team,x){
+ let ps=x.players.filter(p=>p.team===team&&p.starter);
+ let groups={GK:[],DEF:[],MID:[],ATT:[]};
+ ps.forEach((p,i)=>{let pos=p.position||"";if(pos==="GK")groups.GK.push(p);else if(["CB","LB","RB"].includes(pos))groups.DEF.push(p);else if(["CM","DM","AM"].includes(pos))groups.MID.push(p);else groups.ATT.push(p)});
+ if(!ps.some(p=>p.position)){groups={GK:ps.slice(0,1),DEF:ps.slice(1,5),MID:ps.slice(5,8),ATT:ps.slice(8,11)}}
+ const row=g=>`<div class="pitch-line">${g.map(p=>{const idx=x.players.indexOf(p);return `<div class="pitch-player" onclick="editPlayer(${x.id},${idx})"><div class="avatar">${initials(p.name)}</div><span class="p-rating ${ratingClass(p.rating)}">${(+p.rating||7).toFixed(1)} ★</span><div class="p-name">${esc(p.name)}</div><div class="p-num">${esc(p.position||"")}</div></div>`}).join("")}</div>`;
+ return `<div class="pitch-wrap"><div class="pitch-head"><div class="team-title">${clubLogo(team,"score-logo")}<span>${esc(team)}</span></div><span class="team-rating">${avg(ps.map(p=>+p.rating||0))}</span></div><div class="pitch">${row(groups.GK)}${row(groups.DEF)}${row(groups.MID)}${row(groups.ATT)}</div></div>`;
+}
+function substitutes(team,x){let ps=x.players.filter(p=>p.team===team&&!p.starter);if(!ps.length)return "";return `<div class="sub-list"><b>Substitutes</b>${ps.map(p=>{const idx=x.players.indexOf(p);return `<div class="sub-row"><div class="sub-avatar">${initials(p.name)}</div><div style="flex:1"><b>${esc(p.name)}</b><div class="small">${esc(p.position||"Substitute")}</div></div><button class="secondary" onclick="editPlayer(${x.id},${idx})">${(+p.rating||7).toFixed(1)}</button></div>`}).join("")}</div>`}
+function openMatch(id){
+  let x=data.matches.find(z=>z.id===id);if(!x)return;
+  if(!x.players||!x.players.length){const positions=["GK","LB","CB","CB","RB","DM","CM","AM","LW","RW","ST"];x.players=[...positions.map((position,i)=>({name:`Player ${i+1}`,team:x.home,position,starter:true,rating:7,goals:0,assists:0})),...positions.map((position,i)=>({name:`Player ${i+1}`,team:x.away,position,starter:true,rating:7,goals:0,assists:0}))];save()}
+ showModal();document.getElementById("sheet").innerHTML=`<button class="close" onclick="closeModal()">×</button>
+ <div class="score-head"><div class="score-team">${clubLogo(x.home,"score-logo")}<div>${esc(x.home)}</div></div><div class="score">${x.hs} - ${x.as}</div><div class="score-team">${clubLogo(x.away,"score-logo")}<div>${esc(x.away)}</div></div></div>
+ <div class="small" style="text-align:center">${esc(x.comp)} · ${esc(x.date)} · ${esc(x.time)}</div>
+ <div class="card"><div class="label">Your match rating</div><input type="number" min="1" max="10" step=".1" value="${+x.mr||7}" onchange="setMatchRating(${x.id},this.value)">${x.watched||+x.mr>0?`<div class="small" style="margin-top:8px">✓ Added to your Watch List</div>`:`<div class="small" style="margin-top:8px">Rate this match to add it to your Watch List.</div>`}</div>
+  <div class="between"><h3 style="margin:0">Lineup</h3><span class="small">Tap any player to edit</span></div>
+ ${pitchTeam(x.home,x)}${substitutes(x.home,x)}
+ ${pitchTeam(x.away,x)}${substitutes(x.away,x)}
+ <div class="match-actions"><button style="flex:1" onclick="saveMatchAndClose(${x.id})">Save match</button><button class="danger" style="flex:1" onclick="delMatch(${x.id})">Delete match</button></div>`;
+}
+function setMatchRating(id,v){let x=data.matches.find(z=>z.id===id);if(!x)return;x.mr=Math.max(1,Math.min(10,+v||1));x.watched=x.mr>0;save();openMatch(id)}
+function editPlayer(id,index){
+ let x=data.matches.find(z=>z.id===id),p=x&&x.players[index];if(!p)return;
+ showModal();document.getElementById("sheet").innerHTML=`<button class="close" onclick="openMatch(${id})">×</button><h2>Edit Player</h2><div class="small">${esc(p.team)} · ${esc(p.position||"Player")}</div>
+ <div class="field"><label>Player name</label><input id="pname" type="text" value="${esc(p.name)}" placeholder="Player name"></div>
+ <div class="field"><label>Position</label><input id="pposition" type="text" value="${esc(p.position||"")}" placeholder="GK, CB, CM, RW..."></div>
+ <div class="field"><label>Player rating (1–10)</label><input id="prating" type="number" min="1" max="10" step=".1" value="${+p.rating||7}"></div>
+ <div class="grid"><div class="field"><label>Goals</label><input id="pgoals" type="number" min="0" value="${+p.goals||0}"></div><div class="field"><label>Assists</label><input id="passists" type="number" min="0" value="${+p.assists||0}"></div></div>
+ <button onclick="savePlayerEdit(${id},${index})">Save player</button>`;
+}
+function savePlayerEdit(id,index){
+ let x=data.matches.find(z=>z.id===id),p=x&&x.players[index];if(!p)return;
+ const name=document.getElementById("pname").value.trim();if(name)p.name=name;
+ p.position=document.getElementById("pposition").value.trim();p.rating=Math.max(1,Math.min(10,+document.getElementById("prating").value||7));p.goals=Math.max(0,+document.getElementById("pgoals").value||0);p.assists=Math.max(0,+document.getElementById("passists").value||0);save();openMatch(id);
+}
+function players(m){
+ let source=data.matches.filter(x=>compFilter==="all"||x.comp===compFilter);
+ let map={};source.forEach(x=>x.players.forEach(p=>{let k=p.name.toLowerCase();if(!map[k])map[k]={name:p.name,ratings:[],goals:0,assists:0,team:p.team,position:p.position||""};map[k].ratings.push(+p.rating||0);map[k].goals+=+p.goals||0;map[k].assists+=+p.assists||0}));
+ let arr=Object.values(map);
+ let positions=arr.map(x=>x.position).filter(Boolean),teams=arr.map(x=>x.team).filter(Boolean);
+ let comps=[...new Set(data.matches.map(x=>x.comp).filter(Boolean))];
+ arr=arr.filter(p=>(posFilter==="all"||p.position===posFilter)&&(clubFilter==="all"||p.team===clubFilter));
+ let q=playerSearch.toLowerCase();if(q)arr=arr.filter(p=>p.name.toLowerCase().includes(q)||p.team.toLowerCase().includes(q));
+ arr.sort((a,b)=>Number(avg(b.ratings))-Number(avg(a.ratings)));
+ m.innerHTML=`<div><h2 style="margin:0">Player Rankings</h2><div class="small">${arr.length} players shown</div></div>
+ <div class="search"><input value="${esc(playerSearch)}" oninput="playerSearch=this.value;players(document.getElementById('main'))" placeholder="Search player"></div>
+ <div class="filter-grid">
+ <select onchange="posFilter=this.value;players(document.getElementById('main'))"><option value="all">All positions</option>${[...new Set(positions)].sort().map(v=>`<option ${v===posFilter?"selected":""}>${v}</option>`).join("")}</select>
+ <select onchange="clubFilter=this.value;players(document.getElementById('main'))"><option value="all">All clubs</option>${[...new Set(teams)].sort().map(v=>`<option ${v===clubFilter?"selected":""}>${esc(v)}</option>`).join("")}</select>
+ <select onchange="compFilter=this.value;players(document.getElementById('main'))"><option value="all">All competitions</option>${comps.map(v=>`<option ${v===compFilter?"selected":""}>${esc(v)}</option>`).join("")}</select></div>
+ ${!arr.length?`<div class="empty">No players match those filters.</div>`:`<div class="list" style="margin-top:12px">${arr.map((p,i)=>`<div class="item match-card" onclick="openPlayer('${esc(p.name).replace(/'/g,"&#39;")}')"><div class="player-line"><div><b>#${i+1} ${esc(p.name)}</b><div class="small">${esc(p.team)} · ${esc(p.position||"")}</div></div><span class="rating">${avg(p.ratings)}</span></div><div class="small" style="margin-top:7px">Goals ${p.goals} · Assists ${p.assists}</div></div>`).join("")}</div>`}`;
+}
+function favorites(m){
+ let pnames=data.favorites.players,cnames=data.favorites.clubs;
+ m.innerHTML=`<div class="between"><div><h2 style="margin:0">Favorites</h2><div class="small">Players and clubs you follow</div></div></div>
+ <div class="segment"><button class="active" onclick="favoritePlayers()">Players</button><button onclick="favoriteClubs()">Clubs</button></div>
+ <div class="card"><h3 style="margin-top:0">Add player favorite</h3><input id="favPlayer" placeholder="Player name"><button style="margin-top:8px" onclick="addFavPlayer()">＋ Favorite player</button></div>
+ ${pnames.length?pnames.map(n=>favPlayerCard(n)).join(""):`<div class="empty">No favorite players yet.</div>`}`;
+}
+function favoritePlayers(){render()}
+function favoriteClubs(){
+ let m=document.getElementById("main");m.innerHTML=`<div class="between"><div><h2 style="margin:0">Favorite Clubs</h2><div class="small">Club cards don't open profiles.</div></div></div><div class="card"><h3 style="margin-top:0">Add club favorite</h3><select id="favClub">${clubs.map(c=>`<option>${esc(c[0])}</option>`).join("")}</select><button style="margin-top:8px" onclick="addFavClub()">＋ Favorite club</button></div>${data.favorites.clubs.length?data.favorites.clubs.map(n=>{return `<div class="card fav-card">${clubLogo(n,"club-logo")}<div style="flex:1"><b>${esc(n)}</b></div><button class="danger" onclick="removeFavClub('${esc(n).replace(/'/g,"&#39;")}')">Remove</button></div>`}).join(""):`<div class="empty">No favorite clubs yet.</div>`}`;
+}
+function favPlayerCard(n){
+ let a=allPlayers().filter(p=>p.name.toLowerCase()===n.toLowerCase()),ratings=a.map(p=>+p.rating||0),profile=data.favoriteProfiles[n.toLowerCase()]||{};
+ return `<div class="card fav-card"><div class="photo">${profile.photo?`<img src="${esc(profile.photo)}" alt="${esc(n)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none'">`:initials(n)}</div><div style="flex:1"><b>${esc(n)}</b><div class="small">Average match rating: ${avg(ratings)}</div></div><button class="secondary" onclick="openPlayer('${esc(n).replace(/'/g,"&#39;")}')">Open</button><button class="danger" onclick="removeFavPlayer('${esc(n).replace(/'/g,"&#39;")}')">×</button></div>`;
+}
+function addFavPlayer(){let n=document.getElementById("favPlayer").value.trim();if(n&&!data.favorites.players.includes(n)){data.favorites.players.push(n);data.favoriteProfiles[n.toLowerCase()]={name:n,photo:""};save()}render()}
+function removeFavPlayer(n){data.favorites.players=data.favorites.players.filter(x=>x!==n);save();render()}
+function addFavClub(){let n=document.getElementById("favClub").value;if(!data.favorites.clubs.includes(n)){data.favorites.clubs.push(n);save()}favoriteClubs()}
+function removeFavClub(n){data.favorites.clubs=data.favorites.clubs.filter(x=>x!==n);save();favoriteClubs()}
+function openPlayer(name){
+ let a=allPlayers().filter(p=>p.name.toLowerCase()===name.toLowerCase()),ratings=a.map(p=>+p.rating||0),profile=data.favoriteProfiles[name.toLowerCase()]||{name:name,photo:""};
+ showModal();document.getElementById("sheet").innerHTML=`<button class="close" onclick="closeModal()">×</button>
+ <div class="fav-profile-head"><div class="profile-photo">${profile.photo?`<img src="${esc(profile.photo)}" alt="${esc(name)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.style.display='none'">`:initials(name)}</div><div><h2 style="margin:0">${esc(name)}</h2><div class="small">${a.length?esc(a[0].team):"Favorite player"}</div></div></div>
+ <div class="grid" style="margin-top:16px"><div class="stat"><div class="label">Average match rating</div><b>${avg(ratings)}</b></div><div class="stat"><div class="label">Matches rated</div><b>${a.length}</b></div></div>
+ ${a.length?`<h3>Rating history</h3>${a.slice().reverse().map(p=>`<div class="item" style="margin:7px 0"><div class="between"><div><b>${esc(p.match)}</b><div class="small">${esc(p.date)}</div></div><span class="rating">${(+p.rating||0).toFixed(1)}</span></div></div>`).join("")}`:`<div class="empty" style="padding:28px 10px">No match ratings yet. Rate this player in a match and their average will appear here.</div>`}`;
+}
+function watchlist(m){
+ let arr=data.matches.filter(x=>x.watched===true || +x.mr>0).sort((a,b)=>(+b.mr)-(+a.mr));
+ m.innerHTML=`<div class="between"><div><h2 style="margin:0">Watch List</h2><div class="small">Ranked by your own match ratings</div></div><button class="ghost" onclick="go('home')">Home</button></div>${arr.length?`<div class="list" style="margin-top:12px">${arr.map((x,i)=>`<div class="card match-card" onclick="openMatch(${x.id})"><div class="between"><div><span class="rank">#${i+1}</span> <b>${esc(x.home)} vs ${esc(x.away)}</b><div class="small" style="margin-top:6px">${esc(x.comp)} · ${esc(x.date)}</div></div><span class="rating">${(+x.mr).toFixed(1)}</span></div></div>`).join("")}</div>`:`<div class="empty">Your watched matches will appear here after you rate them.</div>`}`;
+}
+const oldRender=render;
+render=function(){if(page==="watchlist"){document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));watchlist(document.getElementById("main"));return}oldRender()};
+function showModal(){document.getElementById("modal").classList.remove("hidden");document.body.style.overflow="hidden"}
+function closeModal(){document.getElementById("modal").classList.add("hidden");document.body.style.overflow=""}
+function saveMatchAndClose(id){let x=data.matches.find(z=>z.id===id);if(!x)return;if(+x.mr>0)x.watched=true;save();closeModal();render()}
+function delMatch(id){if(!data.matches.some(z=>z.id===id))return;data.matches=data.matches.filter(z=>z.id!==id);save();closeModal();render()}
+render();
+</script>
+</body>
+</html>
